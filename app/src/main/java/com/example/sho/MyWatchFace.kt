@@ -82,6 +82,9 @@ class MyWatchFace : CanvasWatchFaceService() {
         private var mHeight: Float = 0F
         private var mWidth: Float = 0F
 
+        /* Turn off the analog-default mode */
+        private var dAnalog: Boolean = false
+
         private var mSecondHandLength: Float = 0F
         private var sMinuteHandLength: Float = 0F
         private var sHourHandLength: Float = 0F
@@ -425,14 +428,30 @@ class MyWatchFace : CanvasWatchFaceService() {
              * Ensure the "seconds" hand is drawn only when we are in interactive mode.
              * Otherwise, we only update the watch face once a minute.
              */
+
+            var posX = mCenterX + 50f
+
             if (!mAmbient) {
-                for (tickIndex in -10..70) { // This used for creating `overflowed` additional second's tick
-                    var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat()
+
+                /* Draw second */
+                for (tickIndex in -10..70) { /* This used for creating `overflowed` additional second's tick */
+                    var tickVer = ((((tickIndex.toDouble()) / 10.0) * mHeight)).toFloat() - 25f
                     val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
-                    tickVer -= (((seconds - 4f) / 5.0) * mHeight).toFloat()
-                    canvas.drawLine(mCenterX, tickVer, mCenterX + 20f, tickVer, mTickAndCirclePaint)
-                    canvas.drawText(tickString.toString(), mCenterX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
+                    tickVer -= (((seconds - 7f) / 10.0) * mHeight).toFloat()
+                    canvas.drawLine(posX, tickVer, posX + 20f, tickVer, mTickAndCirclePaint)
+                    canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
                 }
+
+                /* Draw minute */
+                posX -= 100f
+                for (tickIndex in -10..70) { /* This used for creating `overflowed` additional minute's tick */
+                    var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat() - 25f
+                    val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
+                    tickVer -= (((minutes + (seconds / 60f) - 3.9f) / 5.0) * mHeight).toFloat()
+                    canvas.drawLine(posX, tickVer, posX + 20f, tickVer, mMinutePaint)
+                    canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
+                }
+
             }
 
             /*
@@ -450,30 +469,32 @@ class MyWatchFace : CanvasWatchFaceService() {
              */
             canvas.save()
 
-            canvas.rotate(hoursRotation, mCenterX, mCenterY)
-            canvas.drawLine(
-                mCenterX,
-                mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-                mCenterX,
-                mCenterY - sHourHandLength,
-                mHourPaint
-            )
+            if (dAnalog)  {
+                canvas.rotate(hoursRotation, mCenterX, mCenterY)
+                canvas.drawLine(
+                    mCenterX,
+                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
+                    mCenterX,
+                    mCenterY - sHourHandLength,
+                    mHourPaint
+                )
 
-            canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY)
-            canvas.drawLine(
-                mCenterX,
-                mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
-                mCenterX,
-                mCenterY - sMinuteHandLength,
-                mMinutePaint
-            )
+                canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY)
+                canvas.drawLine(
+                    mCenterX,
+                    mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
+                    mCenterX,
+                    mCenterY - sMinuteHandLength,
+                    mMinutePaint
+                )
 
-            canvas.drawCircle(
-                mCenterX,
-                mCenterY,
-                CENTER_GAP_AND_CIRCLE_RADIUS,
-                mTickAndCirclePaint
-            )
+                canvas.drawCircle(
+                    mCenterX,
+                    mCenterY,
+                    CENTER_GAP_AND_CIRCLE_RADIUS,
+                    mTickAndCirclePaint
+                )
+            }
 
             /* Restore the canvas' original orientation. */
             canvas.restore()
