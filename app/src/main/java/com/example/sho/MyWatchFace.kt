@@ -411,10 +411,14 @@ class MyWatchFace : CanvasWatchFaceService() {
             val seconds =
                 mCalendar.get(Calendar.SECOND) + mCalendar.get(Calendar.MILLISECOND) / 1000f
 
-            val minutesRotation = mCalendar.get(Calendar.MINUTE) * 6f
+            val minutes = mCalendar.get(Calendar.MINUTE)
+            val minutesRotation = minutes * 6f
 
-            val hourHandOffset = mCalendar.get(Calendar.MINUTE) / 2f
-            val hoursRotation = mCalendar.get(Calendar.HOUR) * 30 + hourHandOffset
+            val hour = mCalendar.get(Calendar.HOUR)
+            val hourHandOffset = minutes / 2f
+            val hoursRotation = hour * 30 + hourHandOffset
+
+            val hourString = mCalendar.get(Calendar.HOUR_OF_DAY)
 
 
             /*
@@ -422,7 +426,7 @@ class MyWatchFace : CanvasWatchFaceService() {
              * Otherwise, we only update the watch face once a minute.
              */
             if (!mAmbient) {
-                for (tickIndex in -10..70) {
+                for (tickIndex in -10..70) { // This used for creating `overflowed` additional second's tick
                     var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat()
                     val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
                     tickVer -= (((seconds - 4f) / 5.0) * mHeight).toFloat()
@@ -432,12 +436,14 @@ class MyWatchFace : CanvasWatchFaceService() {
             }
 
             /*
-             * Try to create text here
+             * Try to create text here, for debugging
              */
 
-            brush.textSize = 30f
+            brush.textSize = 15f
             canvas.rotate(0f, mCenterX, mCenterY)
-            canvas.drawText(Math.floor(seconds.toDouble()).toInt().toString(), mCenterX + 80f, mCenterY, brush)
+            canvas.drawText( hourString.toString()
+                    + " : " + Math.floor(minutes.toDouble()).toInt().toString()
+                    + " : " + Math.floor(seconds.toDouble()).toInt().toString(), mCenterX - 140f, mCenterY, brush)
 
             /*
              * Save the canvas state before we can begin to rotate it.
