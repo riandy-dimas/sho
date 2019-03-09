@@ -19,6 +19,10 @@ import android.widget.Toast
 import java.lang.ref.WeakReference
 import java.util.Calendar
 import java.util.TimeZone
+import android.graphics.Shader
+import android.graphics.LinearGradient
+
+
 
 /**
  * Updates rate in milliseconds for interactive mode. We update once a second to advance the
@@ -31,13 +35,13 @@ private const val INTERACTIVE_UPDATE_RATE_MS = 10
  */
 private const val MSG_UPDATE_TIME = 0
 
-private const val HOUR_STROKE_WIDTH = 5f
+private const val HOUR_STROKE_WIDTH = 6f
 private const val MINUTE_STROKE_WIDTH = 3f
 private const val SECOND_TICK_STROKE_WIDTH = 2f
 
 private const val CENTER_GAP_AND_CIRCLE_RADIUS = 4f
 
-private const val SHADOW_RADIUS = 6f
+private const val SHADOW_RADIUS = 2f
 
 /**
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't
@@ -408,6 +412,12 @@ class MyWatchFace : CanvasWatchFaceService() {
 
 
             /*
+             * Save the canvas state before we can begin to rotate it.
+             */
+            canvas.save()
+
+
+            /*
              * These calculations reflect the rotation in degrees per unit of time, e.g.,
              * 360 / 60 = 6 and 360 / 12 = 30.
              */
@@ -432,12 +442,11 @@ class MyWatchFace : CanvasWatchFaceService() {
             var posX = mCenterX + 50f
 
             if (!mAmbient) {
-
                 /* Draw second */
                 for (tickIndex in -10..70) { /* This used for creating `overflowed` additional second's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 10.0) * mHeight)).toFloat() - 25f
                     val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
-                    tickVer -= (((seconds - 7f) / 10.0) * mHeight).toFloat()
+                    tickVer -= (((seconds - 6.8f) / 10.0) * mHeight).toFloat()
                     canvas.drawLine(posX, tickVer, posX + 20f, tickVer, mTickAndCirclePaint)
                     canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
                 }
@@ -448,7 +457,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 for (tickIndex in -10..70) { /* This used for creating `overflowed` additional minute's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat() - 25f
                     val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
-                    tickVer -= (((minutes + (seconds / 60f) - 3.9f) / 5.0) * mHeight).toFloat()
+                    tickVer -= (((minutes + (seconds / 60f) - 3.91f) / 5.0) * mHeight).toFloat()
                     canvas.drawLine(posX, tickVer, posX + 20f, tickVer, mMinutePaint)
                     canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
                 }
@@ -463,12 +472,7 @@ class MyWatchFace : CanvasWatchFaceService() {
             canvas.rotate(0f, mCenterX, mCenterY)
             canvas.drawText( hourString.toString()
                     + " : " + Math.floor(minutes.toDouble()).toInt().toString()
-                    + " : " + Math.floor(seconds.toDouble()).toInt().toString(), mCenterX - 140f, mCenterY, brush)
-
-            /*
-             * Save the canvas state before we can begin to rotate it.
-             */
-            canvas.save()
+                    + " : " + Math.floor(seconds.toDouble()).toInt().toString(), mCenterX - 140f, mCenterY - 5f, brush)
 
             if (dAnalog)  {
                 canvas.rotate(hoursRotation, mCenterX, mCenterY)
@@ -495,6 +499,28 @@ class MyWatchFace : CanvasWatchFaceService() {
                     CENTER_GAP_AND_CIRCLE_RADIUS,
                     mTickAndCirclePaint
                 )
+            } else {
+                val gColors: IntArray = intArrayOf(Color.TRANSPARENT, Color.argb(255, 251, 152, 0))
+                val gPos: FloatArray = floatArrayOf(0f, 0.2f)
+                val lBrush = Paint().apply {
+                    color = mWatchHandColor
+                    strokeWidth = HOUR_STROKE_WIDTH
+                    isAntiAlias = true
+                    strokeCap = Paint.Cap.ROUND
+                    shader = LinearGradient(
+                        0f,
+                        mCenterY,
+                        mCenterX,
+                        mCenterY,
+                        gColors,
+                        gPos,
+                        Shader.TileMode.MIRROR /*or REPEAT*/
+                    )
+                    setShadowLayer(
+                        SHADOW_RADIUS, 0f, 0f, Color.BLACK
+                    )
+                }
+                canvas.drawLine(0f, mCenterY, mWidth, mCenterY, lBrush)
             }
 
             /* Restore the canvas' original orientation. */
