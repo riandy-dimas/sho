@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sho</string>
+    <string name="message">Watch face tapped</string>
+    <string name="my_analog_name">Sho Clock</string>
+</resources>
