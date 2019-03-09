@@ -444,6 +444,7 @@ class MyWatchFace : CanvasWatchFaceService() {
 
                 /* Draw minute */
                 posX -= 100f
+                brush.textSize = 20f
                 for (tickIndex in -10..70) { /* This used for creating `overflowed` additional minute's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat() - 25f
                     val tickString = if ((tickIndex + 1) % 60 >= 0) (tickIndex + 1) % 60 else 60 + (tickIndex + 1) % 60
