@@ -21,7 +21,8 @@ import java.util.Calendar
 import java.util.TimeZone
 import android.graphics.Shader
 import android.graphics.LinearGradient
-
+import java.text.DateFormatSymbols
+import java.text.SimpleDateFormat
 
 
 /**
@@ -432,14 +433,16 @@ class MyWatchFace : CanvasWatchFaceService() {
             val hoursRotation = hour * 30 + hourHandOffset
 
             val hourString = mCalendar.get(Calendar.HOUR_OF_DAY)
+            val date = mCalendar.get(Calendar.DATE)
 
+            val month = DateFormatSymbols().shortMonths[(mCalendar.get(Calendar.MONTH))]
 
             /*
              * Ensure the "seconds" hand is drawn only when we are in interactive mode.
              * Otherwise, we only update the watch face once a minute.
              */
 
-            var posX = mCenterX + 50f
+            var posX = mCenterX + 80f
 
             if (!mAmbient) {
                 /* Draw second */
@@ -452,7 +455,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 }
 
                 /* Draw minute */
-                posX -= 100f
+                posX -= 80f
                 brush.textSize = 20f
                 for (tickIndex in -10..70) { /* This used for creating `overflowed` additional minute's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat() - 25f
@@ -462,7 +465,26 @@ class MyWatchFace : CanvasWatchFaceService() {
                     canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
                 }
 
+                /* Draw hour */
+                posX -= 80f
+                brush.textSize = 30f
+                for (tickIndex in -10..34) { /* This used for creating `overflowed` additional minute's tick */
+                    var tickVer = ((((tickIndex.toDouble()) / 4.0) * mHeight)).toFloat() + 240f
+                    val tickString = if ((tickIndex + 1) % 24 >= 0) (tickIndex + 1) % 24 else 24 + (tickIndex + 1) % 24
+                    tickVer -= (((hourString / 4.0)) * mHeight).toFloat() + ((minutes / 60f) * 80f)
+                    canvas.drawLine(posX, tickVer, posX + 20f, tickVer, mHourPaint)
+                    canvas.drawText(tickString.toString(), posX + 40f, tickVer + (brush.textSize / 2f) - 2f, brush)
+                }
             }
+
+            /*
+             * Draw date and month here
+             */
+
+            brush.textSize = 16f
+            canvas.rotate(0f, mCenterX, mCenterY)
+            canvas.drawText( date.toString()
+                    + " " + month, mCenterX - 140f, mCenterY - 10f, brush)
 
             /*
              * Try to create text here, for debugging
@@ -471,8 +493,9 @@ class MyWatchFace : CanvasWatchFaceService() {
             brush.textSize = 15f
             canvas.rotate(0f, mCenterX, mCenterY)
             canvas.drawText( hourString.toString()
-                    + " : " + Math.floor(minutes.toDouble()).toInt().toString()
-                    + " : " + Math.floor(seconds.toDouble()).toInt().toString(), mCenterX - 140f, mCenterY - 5f, brush)
+                    + " " + (if (seconds.toInt() % 2 != 0) ":" else " ") + " " + Math.floor(minutes.toDouble()).toInt().toString()
+//                    + " : " + Math.floor(seconds.toDouble()).toInt().toString()
+                , mCenterX - 140f, mCenterY + 20f, brush)
 
             if (dAnalog)  {
                 canvas.rotate(hoursRotation, mCenterX, mCenterY)
