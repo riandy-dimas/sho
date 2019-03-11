@@ -455,7 +455,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 }
 
                 /* Draw minute */
-                posX -= 80f
+                posX -= 75f
                 brush.textSize = 20f
                 for (tickIndex in -10..70) { /* This used for creating `overflowed` additional minute's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 5.0) * mHeight)).toFloat() - 25f
@@ -466,7 +466,7 @@ class MyWatchFace : CanvasWatchFaceService() {
                 }
 
                 /* Draw hour */
-                posX -= 80f
+                posX -= 75f
                 brush.textSize = 30f
                 for (tickIndex in -10..34) { /* This used for creating `overflowed` additional minute's tick */
                     var tickVer = ((((tickIndex.toDouble()) / 4.0) * mHeight)).toFloat() + 240f
